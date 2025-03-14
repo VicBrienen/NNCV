@@ -31,6 +31,7 @@ from torchvision.transforms.v2 import (
 )
 
 from unet import UNet
+from loss import dice_loss_multiclass
 
 
 # Mapping class IDs to train IDs
@@ -137,7 +138,7 @@ def main(args):
     ).to(device)
 
     # Define the loss function
-    criterion = nn.CrossEntropyLoss(ignore_index=255)  # Ignore the void class
+    criterion = lambda pred, target: dice_loss_multiclass(pred, target, num_classes=19, ignore_index=255)  # Ignore the void class
 
     # Define the optimizer
     optimizer = AdamW(model.parameters(), lr=args.lr)
