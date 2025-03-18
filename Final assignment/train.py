@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader
 from torchvision.datasets import Cityscapes, wrap_dataset_for_transforms_v2
 from torchvision.utils import make_grid
 from torchvision.transforms.v2 import (Compose, Normalize, Resize, ToImage,ToDtype)
+from torch.cuda.amp import GradScaler, autocast
 
 from unet import UNet
 from loss import MeanDice
@@ -115,11 +116,12 @@ def main(args):
         n_classes=19,  # 19 classes in the Cityscapes dataset
     ).to(device)
 
-    # Define the loss function
+    # Define the loss function and optimizer
     criterion = MeanDice()
-
-    # Define the optimizer
     optimizer = AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+
+    # initialize AMP GradScaler
+    scaler = torch.cuda.amp.GradScaler()
 
     # Training loop
     best_valid_loss = float('inf')
@@ -137,10 +139,16 @@ def main(args):
             labels = labels.long().squeeze(1)  # Remove channel dimension
 
             optimizer.zero_grad()
-            outputs = model(images)
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
+
+            # Forward pass with autocast
+            with torch.cuda.amp.autocast():
+                outputs = model(images)
+                loss = criterion(outputs, labels)
+
+            # Backward pass with scaling
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
 
             wandb.log({
                 "train_loss": loss.item(),
@@ -159,22 +167,21 @@ def main(args):
 
                 labels = labels.long().squeeze(1)  # Remove channel dimension
 
-                outputs = model(images)
-                loss = criterion(outputs, labels)
+                # Use autocast during inference
+                with torch.cuda.amp.autocast():
+                    outputs = model(images)
+                    loss = criterion(outputs, labels)
+
                 losses.append(loss.item())
             
                 if i == 0:
                     predictions = outputs.softmax(1).argmax(1)
-
                     predictions = predictions.unsqueeze(1)
                     labels = labels.unsqueeze(1)
-
                     predictions = convert_train_id_to_color(predictions)
                     labels = convert_train_id_to_color(labels)
-
                     predictions_img = make_grid(predictions.cpu(), nrow=8)
                     labels_img = make_grid(labels.cpu(), nrow=8)
-
                     predictions_img = predictions_img.permute(1, 2, 0).numpy()
                     labels_img = labels_img.permute(1, 2, 0).numpy()
 
