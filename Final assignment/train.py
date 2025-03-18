@@ -31,7 +31,7 @@ from torchvision.transforms.v2 import (
 )
 
 from unet import UNet
-from loss import dice_loss_multiclass
+from loss import MeanDice
 
 
 # Mapping class IDs to train IDs
@@ -139,11 +139,10 @@ def main(args):
     ).to(device)
 
     # Define the loss function
-    criterion = lambda pred, target: dice_loss_multiclass(pred, target, num_classes=19, ignore_index=255)
+    criterion = MeanDice()
 
     # Define the optimizer
     optimizer = AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5)
 
     # Training loop
     best_valid_loss = float('inf')
@@ -208,8 +207,6 @@ def main(args):
                     }, step=(epoch + 1) * len(train_dataloader) - 1)
             
             valid_loss = sum(losses) / len(losses)
-
-            scheduler.step(valid_loss)
 
             wandb.log({
                 "valid_loss": valid_loss

@@ -1,42 +1,23 @@
 import torch
 
-def dice_loss_multiclass(pred, target, num_classes, ignore_index=255, epsilon=1e-6):
-    pred = torch.softmax(pred, dim=1)  # (batch, num_classes, H, W)
-    target = target.long()
-    
-    # create mask to ignore ignore_index pixels
-    mask = (target != ignore_index).unsqueeze(1).float()  # (batch, 1, H, W)
-    
-    # convert target to one-hot representation
-    target_clone = target.clone()
-    target_clone[target_clone == ignore_index] = 0
-    target_one_hot = torch.nn.functional.one_hot(target_clone, num_classes).permute(0, 3, 1, 2).float()  # (batch, num_classes, H, W)
-    
-    # apply mask to ignore certain pixels
-    target_one_hot = target_one_hot * mask
+class MeanDice(torch.nn.Module):
+    def __init__(self, num_classes=19, ignore_index=255, epsilon=1e-6):
+        super().__init__()
+        self.num_classes = num_classes
+        self.ignore_index = ignore_index
+        self.epsilon = epsilon
 
-    # compute dice components
-    intersection = (pred * target_one_hot).sum(dim=(2, 3))  # (batch, num_classes)
-    union = pred.sum(dim=(2, 3)) + target_one_hot.sum(dim=(2, 3))  # (batch, num_classes)
-    
-    dice_score = (2. * intersection + epsilon) / (union + epsilon)  # (batch, num_classes)
+    def forward(self, pred, target):
+        pred = torch.nn.functional.softmax(pred, dim=1)  # (batch, num_classes, H, W)
+        valid = (target != self.ignore_index)
 
-    # take mean over classes first, then over batch
-    return 1 - dice_score.mean(dim=1).mean()
+        # mask out the ignore_index
+        target = target.masked_fill(~valid, 0)
+        target_one_hot = torch.nn.functional.one_hot(target, num_classes=self.num_classes).permute(0, 3, 1, 2).float()  # (batch, num_classes, H, W)
+        target_one_hot = target_one_hot * valid.unsqueeze(1).float()
 
-
-class Loss(torch.nn.Module):
-    def __init__(self):
-        super(Loss, self).__init__()
-        
-    def dice(self, pred, target):
-        pass
-
-    def mean_dice_loss(self, pred, target):
-        pass
-    
-    def focal(self, pred, target):
-        pass
-
-    def focal_dice(self, pred, target):
-        pass
+        # calculate mean dice score
+        intersection = (pred * target_one_hot).sum(dim=(2, 3))
+        union = pred.sum(dim=(2, 3)) + target_one_hot.sum(dim=(2, 3))
+        dice_score = (2 * intersection + self.epsilon) / (union + self.epsilon)
+        return 1 - dice_score.mean()
