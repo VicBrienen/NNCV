@@ -1,20 +1,5 @@
-"""
-This script implements a training loop for the model. It is designed to be flexible, 
-allowing you to easily modify hyperparameters using a command-line argument parser.
-
-### Key Features:
-1. **Hyperparameter Tuning:** Adjust hyperparameters by parsing arguments from the `main.sh` script or directly 
-   via the command line.
-2. **Remote Execution Support:** Since this script runs on a server, training progress is not visible on the console. 
-   To address this, we use the `wandb` library for logging and tracking progress and results.
-3. **Encapsulation:** The training loop is encapsulated in a function, enabling it to be called from the main block. 
-   This ensures proper execution when the script is run directly.
-
-Feel free to customize the script as needed for your use case.
-"""
 import os
 from argparse import ArgumentParser
-
 import wandb
 import torch
 import torch.nn as nn
@@ -22,13 +7,7 @@ from torch.optim import AdamW
 from torch.utils.data import DataLoader
 from torchvision.datasets import Cityscapes, wrap_dataset_for_transforms_v2
 from torchvision.utils import make_grid
-from torchvision.transforms.v2 import (
-    Compose,
-    Normalize,
-    Resize,
-    ToImage,
-    ToDtype,
-)
+from torchvision.transforms.v2 import (Compose, Normalize, Resize, ToImage,ToDtype)
 
 from unet import UNet
 from loss import MeanDice
@@ -83,9 +62,7 @@ def main(args):
     output_dir = os.path.join("checkpoints", args.experiment_id)
     os.makedirs(output_dir, exist_ok=True)
 
-    # Set seed for reproducability
-    # If you add other sources of randomness (NumPy, Random), 
-    # make sure to set their seeds as well
+    # Set seed for reproducability, if you add other sources of randomness (NumPy, Random), make sure to set their seeds as well
     torch.manual_seed(args.seed)
     torch.backends.cudnn.deterministic = True
 
@@ -218,22 +195,13 @@ def main(args):
                     os.remove(current_best_model_path)
                 current_best_model_path = os.path.join(
                     output_dir, 
-                    f"best_model-epoch={epoch:04}-val_loss={valid_loss:04}.pth"
+                    f"epoch={epoch:04}-val_loss={valid_loss:04}.pth"
                 )
                 torch.save(model.state_dict(), current_best_model_path)
-        
-    print("Training complete!")
 
     # Save the model
-    torch.save(
-        model.state_dict(),
-        os.path.join(
-            output_dir,
-            f"final_model-epoch={epoch:04}-val_loss={valid_loss:04}.pth"
-        )
-    )
+    torch.save(model.state_dict(), os.path.join(output_dir, f"epoch={epoch:04}-val_loss={valid_loss:04}.pth"))
     wandb.finish()
-
 
 if __name__ == "__main__":
     parser = get_args_parser()
