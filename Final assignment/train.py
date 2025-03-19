@@ -119,6 +119,7 @@ def main(args):
     # Define the loss function and optimizer
     criterion = MeanDice()
     optimizer = AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
 
     # initialize AMP GradScaler
     scaler = torch.cuda.amp.GradScaler()
@@ -155,6 +156,8 @@ def main(args):
                 "learning_rate": optimizer.param_groups[0]['lr'],
                 "epoch": epoch + 1,
             }, step=epoch * len(train_dataloader) + i)
+        
+        scheduler.step()
             
         # Validation
         model.eval()
