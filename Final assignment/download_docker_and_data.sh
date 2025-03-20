@@ -4,7 +4,7 @@
 #SBATCH --cpus-per-task=9
 #SBATCH --gpus=1
 #SBATCH --partition=gpu_mig
-#SBATCH --time=00:05:00
+#SBATCH --time=03:0:00
 
 # Pull container from dockerhub
 apptainer pull container.sif docker://cclaess/5lsm0:v1

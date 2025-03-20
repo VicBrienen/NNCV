@@ -7,7 +7,7 @@ class VisionTransformer(nn.Module):
         super().__init__()
         self.patch_size = patch_size
         self.patch_embed = PatchEmbed(img_width, img_height, patch_size, in_chans, embed_dim)
-        self.pos_embed = nn.Parameter(torch.zeros(1, self.patch_embed.num_patches, embed_dim))
+        self.pos_embed = self.pos_embed = nn.Parameter(torch.randn(1, self.patch_embed.num_patches, embed_dim) * 0.02) # nn.Parameter(torch.zeros(1, self.patch_embed.num_patches, embed_dim))
         self.transformer = nn.Sequential(*[TransformerBlock(embed_dim, num_heads, mlp_ratio, qkv_bias) for _ in range(depth)])
         self.segmentation_head = nn.Conv2d(embed_dim, num_classes, kernel_size=1)
 
