@@ -1,11 +1,14 @@
 import torch
+import torch.nn as nn
+
 
 class MeanDice(torch.nn.Module):
-    def __init__(self, num_classes=19, ignore_index=255, epsilon=1e-6):
+    def __init__(self, num_classes=19, ignore_index=255, epsilon=1e-6, gamma=2):
         super().__init__()
         self.num_classes = num_classes
         self.ignore_index = ignore_index
         self.epsilon = epsilon
+        self.gamma = gamma
 
     def forward(self, pred, target):
         pred = torch.nn.functional.softmax(pred, dim=1)  # (batch, num_classes, H, W)
@@ -20,4 +23,8 @@ class MeanDice(torch.nn.Module):
         intersection = (pred * target_one_hot).sum(dim=(2, 3))
         union = pred.sum(dim=(2, 3)) + target_one_hot.sum(dim=(2, 3))
         dice_score = (2 * intersection + self.epsilon) / (union + self.epsilon)
-        return 1 - dice_score.mean()
+
+        # adjust for class imbalance
+        dice_score = (1 - dice_score)**self.gamma
+
+        return dice_score.mean()
