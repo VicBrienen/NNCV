@@ -11,20 +11,25 @@ class VisionTransformer(nn.Module):
         self.pos_embed = nn.Parameter(torch.zeros(1, self.patch_embed.num_patches, embed_dim))
         nn.init.trunc_normal_(self.pos_embed, std=0.02)
 
-        self.transformer = nn.Sequential(*[TransformerBlock(embed_dim, num_heads, mlp_ratio, qkv_bias) for _ in range(depth)])
-        self.segmentation_head = nn.Conv2d(embed_dim, num_classes, kernel_size=1)
+        self.transformer = nn.Sequential(*[TransformerEncoderBlock(embed_dim, num_heads, mlp_ratio, qkv_bias) for _ in range(depth//2)])
+        
+        self.decoder = nn.Sequential(*[TransformerDecoderBlock(embed_dim, num_heads, mlp_ratio, qkv_bias)for _ in range(depth//2)
+        ])
+        self.classifier = nn.Linear(embed_dim, num_classes)
 
     def forward(self, x):
         B, C, H, W = x.shape
         x = self.patch_embed(x)
         x = x + self.pos_embed  # add positional encoding
         x = self.transformer(x)  # pass through transformer layers
-        H_p, W_p = H // self.patch_size, W // self.patch_size  # patch grid size
-        x = x.transpose(1, 2).reshape(B, -1, H_p, W_p)  # reshape back to spatial dimensions
-        x = self.segmentation_head(x)  # convert to segmentation map
-        return nn.functional.interpolate(x, size=(H, W), mode="bilinear", align_corners=False)
+        x = self.decoder(x)      # refine with decoder block
+        x = self.classifier(x)   # per-token classification
 
-class TransformerBlock(nn.Module):
+        H_p, W_p = H // self.patch_size, W // self.patch_size  # patch grid size
+        x = x.transpose(1, 2).reshape(B, -1, H_p, W_p)  # reshape tokens to spatial map
+        return torch.nn.functional.interpolate(x, size=(H, W), mode="bilinear", align_corners=False)
+
+class TransformerEncoderBlock(nn.Module):
     def __init__(self, dim, num_heads, mlp_ratio=4., qkv_bias=False, attn_drop=0., proj_drop=0.):
         super().__init__()
         self.norm1 = nn.LayerNorm(dim)
@@ -35,6 +40,20 @@ class TransformerBlock(nn.Module):
     def forward(self, x):
         x = x + self.attn(self.norm1(x))  # residual connection + attention
         return x + self.mlp(self.norm2(x))   # residual connection + MLP
+    
+class TransformerDecoderBlock(nn.Module):
+    def __init__(self, dim, num_heads, mlp_ratio=4., qkv_bias=False, attn_drop=0., proj_drop=0.):
+        super().__init__()
+        # A decoder block with self-attention and an MLP refinement
+        self.norm1 = nn.LayerNorm(dim)
+        self.attn = Attention(dim, num_heads, qkv_bias, attn_drop, proj_drop)
+        self.norm2 = nn.LayerNorm(dim)
+        self.mlp = MLP(dim, int(dim * mlp_ratio), drop=proj_drop)
+
+    def forward(self, x):
+        x = x + self.attn(self.norm1(x))
+        x = x + self.mlp(self.norm2(x))
+        return x
 
 class PatchEmbed(nn.Module):
     def __init__(self, img_width=2048, img_height=1024, patch_size=16, in_chans=3, embed_dim=768):
