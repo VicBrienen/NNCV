@@ -3,7 +3,7 @@ from torch import nn
 
 class VisionTransformer(nn.Module):
     def __init__(self, img_width=256, img_height=256, patch_size=16, in_chans=3, num_classes=19, 
-                 embed_dim=768, depth=12, num_heads=8, mlp_ratio=4., qkv_bias=False):
+                 embed_dim=768, depth=6, num_heads=8, mlp_ratio=4., qkv_bias=False):
         super().__init__()
         self.patch_size = patch_size
         self.patch_embed = PatchEmbed(img_width, img_height, patch_size, in_chans, embed_dim)
@@ -11,18 +11,33 @@ class VisionTransformer(nn.Module):
         self.pos_embed = nn.Parameter(torch.zeros(1, self.patch_embed.num_patches, embed_dim))
         nn.init.trunc_normal_(self.pos_embed, std=0.02)
 
-        self.transformer = nn.Sequential(*[TransformerEncoderBlock(embed_dim, num_heads, mlp_ratio, qkv_bias) for _ in range(depth//2)])
+        self.down1 = TransformerEncoderBlock(embed_dim, num_heads, mlp_ratio, qkv_bias)
+        self.down2 = TransformerEncoderBlock(embed_dim, num_heads, mlp_ratio, qkv_bias)
+        self.down3 = TransformerEncoderBlock(embed_dim, num_heads, mlp_ratio, qkv_bias)
+        self.down4 = TransformerEncoderBlock(embed_dim, num_heads, mlp_ratio, qkv_bias)
         
-        self.decoder = nn.Sequential(*[TransformerDecoderBlock(embed_dim, num_heads, mlp_ratio, qkv_bias)for _ in range(depth//2)
-        ])
+        self.up1 = TransformerDecoderBlock(embed_dim, num_heads, mlp_ratio, qkv_bias)
+        self.up2 = TransformerDecoderBlock(embed_dim, num_heads, mlp_ratio, qkv_bias)
+        self.up3 = TransformerDecoderBlock(embed_dim, num_heads, mlp_ratio, qkv_bias)
+        self.up4 = TransformerDecoderBlock(embed_dim, num_heads, mlp_ratio, qkv_bias)
+
         self.classifier = nn.Linear(embed_dim, num_classes)
 
     def forward(self, x):
         B, C, H, W = x.shape
         x = self.patch_embed(x)
         x = x + self.pos_embed  # add positional encoding
-        x = self.transformer(x)  # pass through transformer layers
-        x = self.decoder(x)      # refine with decoder block
+
+        x1 = self.down1(x)
+        x2 = self.down2(x)
+        x3 = self.down3(x)
+        x4 = self.down4(x)
+
+        x = self.up1(x)
+        x = self.up2(x) + x3
+        x = self.up3(x) + x2
+        x = self.up4(x) + x1
+
         x = self.classifier(x)   # per-token classification
 
         H_p, W_p = H // self.patch_size, W // self.patch_size  # patch grid size
