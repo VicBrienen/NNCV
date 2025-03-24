@@ -7,7 +7,7 @@ from torch.optim import AdamW
 from torch.utils.data import DataLoader
 from torchvision.datasets import Cityscapes, wrap_dataset_for_transforms_v2
 from torchvision.utils import make_grid
-from torchvision.transforms.v2 import (Compose, Normalize, Resize, ToImage,ToDtype, random_horizontal_flip)
+from torchvision.transforms.v2 import (Compose, Normalize, Resize, ToImage,ToDtype, RandomHorizontalFlip)
 from torch.cuda.amp import GradScaler, autocast
 
 from unet import UNet
@@ -75,7 +75,7 @@ def main(args):
         ToImage(),
         Resize((256, 256)),
         ToDtype(torch.float32, scale=True),
-        random_horizontal_flip(p=0.5),
+        RandomHorizontalFlip(p=0.5),
         Normalize((0.5,), (0.5,)),
     ])
 
