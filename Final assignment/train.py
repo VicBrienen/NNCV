@@ -10,7 +10,7 @@ from torchvision.utils import make_grid
 from torchvision.transforms.v2 import (Compose, Normalize, Resize, ToImage,ToDtype)
 from torch.cuda.amp import GradScaler, autocast
 
-from transformer import VisionTransformer
+from unet import UNet
 from loss import MeanDice
 
 
@@ -111,17 +111,9 @@ def main(args):
     )
 
     # Define the model
-    model = VisionTransformer(
-        img_width=256, 
-        img_height=256, 
-        patch_size=16, 
-        in_chans=3, 
-        num_classes=19, 
-        embed_dim=768, 
-        depth=12, 
-        num_heads=8, 
-        mlp_ratio=4.0, 
-        qkv_bias=False
+    model = UNet(
+        in_channels=3,  # RGB images
+        n_classes=19,  # 19 classes in the Cityscapes dataset
     ).to(device)
 
     # Define the loss function and optimizer
