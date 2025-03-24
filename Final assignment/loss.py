@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 
-class MeanDice(torch.nn.Module):
+class GeneralizedDice(torch.nn.Module):
     def __init__(self, num_classes=19, ignore_index=255, epsilon=1e-6):
         super().__init__()
         self.num_classes = num_classes

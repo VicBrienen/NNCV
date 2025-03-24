@@ -11,7 +11,7 @@ from torchvision.transforms.v2 import (Compose, Normalize, Resize, ToImage,ToDty
 from torch.cuda.amp import GradScaler, autocast
 
 from unet import UNet
-from loss import MeanDice
+from loss import GeneralizedDice
 
 
 # Mapping class IDs to train IDs
@@ -117,7 +117,7 @@ def main(args):
     ).to(device)
 
     # Define the loss function and optimizer
-    criterion = MeanDice()
+    criterion = GeneralizedDice()
     optimizer = AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
 
