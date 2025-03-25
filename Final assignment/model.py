@@ -13,4 +13,12 @@ class Model(SegformerForSemanticSegmentation):
 
     def forward(self, pixel_values, **kwargs):
         outputs = super().forward(pixel_values, **kwargs)
-        return outputs.logits
+        logits = outputs.logits
+        # Upsample logits to match input resolution
+        logits = torch.nn.functional.interpolate(
+            logits,
+            size=pixel_values.shape[2:],  # matches the height and width of the input
+            mode="bilinear",
+            align_corners=False,
+        )
+        return logits
