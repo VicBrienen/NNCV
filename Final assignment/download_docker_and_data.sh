@@ -13,3 +13,6 @@ apptainer pull container.sif docker://cclaess/5lsm0:v1
 mkdir -p data
 apptainer exec container.sif \
     huggingface-cli download TimJaspersTue/5LSM0 --local-dir ./data --repo-type dataset
+
+# new libraries v1
+apptainer pull container.sif docker://tjmjaspers/nncv2025:v1
