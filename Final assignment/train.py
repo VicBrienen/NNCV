@@ -112,7 +112,7 @@ def main(args):
     )
 
     # Define the model
-    model = Model()
+    model = Model().to(device)
 
     # Define the loss function and optimizer
     criterion = MeanDice()
