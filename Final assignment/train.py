@@ -10,7 +10,7 @@ from torchvision.utils import make_grid
 from torchvision.transforms.v2 import (Compose, Normalize, Resize, ToImage,ToDtype, RandomHorizontalFlip)
 from torch.cuda.amp import GradScaler, autocast
 
-from unet import UNet
+from model import Model
 from loss import MeanDice
 
 
@@ -112,10 +112,7 @@ def main(args):
     )
 
     # Define the model
-    model = UNet(
-        in_channels=3,  # RGB images
-        n_classes=19,  # 19 classes in the Cityscapes dataset
-    ).to(device)
+    model = Model()
 
     # Define the loss function and optimizer
     criterion = MeanDice()

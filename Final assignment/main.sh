@@ -5,7 +5,7 @@ python3 train.py \
     --batch-size 16 \
     --epochs 30 \
     --lr 0.0001 \
-    --weight-decay 0.0001 \
+    --weight-decay 0.01 \
     --num-workers 10 \
     --seed 42 \
-    --experiment-id "Unet" \
+    --experiment-id "segformer" \
