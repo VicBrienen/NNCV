@@ -74,7 +74,7 @@ def main(args):
     # Define the transforms to apply to the data
     transform = Compose([
         ToImage(),
-        Resize((512, 1024)),
+        Resize((640, 640)),
         ToDtype(torch.float32, scale=True),
         RandomHorizontalFlip(p=0.5),
 
