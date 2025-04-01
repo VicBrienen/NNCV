@@ -73,12 +73,18 @@ def main(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Define the transforms to apply to the data
-    transform = Compose([
+    train_transform = Compose([
         ToImage(),
-        RandomScale(scale_range=(0.5, 2.0)), # improve scale invariance
+        # RandomScale(scale_range=(0.5, 2.0)), # improve scale invariance
         RandomCrop((512,1024)), # reduces dependence on global context from full image
         ToDtype(torch.float32, scale=True),
         RandomHorizontalFlip(p=0.5), # practically doubles dataset
+        Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)), # imagenet values (used in ade20k training)
+    ])
+
+    val_transform = Compose([
+        ToImage(),
+        ToDtype(torch.float32, scale=True),
         Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)), # imagenet values (used in ade20k training)
     ])
 
@@ -88,7 +94,7 @@ def main(args):
         split="train", 
         mode=args.annotation, 
         target_type="semantic", 
-        transforms=transform
+        transforms=train_transform
     )
 
     valid_dataset = Cityscapes(
@@ -96,7 +102,7 @@ def main(args):
         split="val", 
         mode="fine", 
         target_type="semantic", 
-        transforms=transform
+        transforms=val_transform
     )
 
     train_dataset = wrap_dataset_for_transforms_v2(train_dataset)
