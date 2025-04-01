@@ -7,7 +7,7 @@ class RandomScale(Transform):
         super().__init__()
         self.min_scale, self.max_scale = scale_range
         
-    def forward(self, img):
+    def forward(self, img, target):
         scale = random.uniform(self.min_scale, self.max_scale)
         new_size = (int(img.size[0] * scale), int(img.size[1] * scale))
         img = Resize(new_size, interpolation=Image.BILINEAR)(img)
