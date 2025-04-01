@@ -10,4 +10,6 @@ class RandomScale(Transform):
     def forward(self, img):
         scale = random.uniform(self.min_scale, self.max_scale)
         new_size = (int(img.size[0] * scale), int(img.size[1] * scale))
-        return Resize(new_size, interpolation=Image.BILINEAR)(img)
+        img = Resize(new_size, interpolation=Image.BILINEAR)(img)
+        target = Resize(new_size, interpolation=Image.NEAREST)(target)
+        return img, target
