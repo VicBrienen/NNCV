@@ -40,6 +40,7 @@ def get_args_parser():
 
     parser = ArgumentParser("Training script for a PyTorch U-Net model")
     parser.add_argument("--data-dir", type=str, default="./data/cityscapes", help="Path to the training data")
+    parser.add_argument("--annotation", type=str, default="fine", help="Annotation quality training set")
     parser.add_argument("--batch-size", type=int, default=64, help="Training batch size")
     parser.add_argument("--epochs", type=int, default=10, help="Number of training epochs")
     parser.add_argument("--lr", type=float, default=0.0001, help="Learning rate")
@@ -76,6 +77,7 @@ def main(args):
         Resize((512, 1024)),
         ToDtype(torch.float32, scale=True),
         RandomHorizontalFlip(p=0.5),
+
         Normalize((0.5,), (0.5,)),
     ])
 
@@ -83,10 +85,11 @@ def main(args):
     train_dataset = Cityscapes(
         args.data_dir, 
         split="train", 
-        mode="fine", 
+        mode=args.annotation, 
         target_type="semantic", 
         transforms=transform
     )
+
     valid_dataset = Cityscapes(
         args.data_dir, 
         split="val", 
