@@ -7,8 +7,9 @@ from torch.optim import AdamW
 from torch.utils.data import DataLoader
 from torchvision.datasets import Cityscapes, wrap_dataset_for_transforms_v2
 from torchvision.utils import make_grid
-from torchvision.transforms.v2 import (Compose, Normalize, Resize, ToImage,ToDtype, RandomHorizontalFlip)
+from torchvision.transforms.v2 import (Compose, Normalize, Resize, ToImage,ToDtype, RandomHorizontalFlip, RandomCrop, RandomScale)
 from torch.cuda.amp import GradScaler, autocast
+from transformers import SegformerImageProcessor
 
 from model import Model
 from loss import MeanDice
@@ -74,11 +75,11 @@ def main(args):
     # Define the transforms to apply to the data
     transform = Compose([
         ToImage(),
-        Resize((640, 640)),
+        RandomScale(scale_range=(0.5, 2.0)), # improve scale invariance
+        RandomCrop((512,1024)), # reduces dependence on global context from full image
         ToDtype(torch.float32, scale=True),
-        RandomHorizontalFlip(p=0.5),
-
-        Normalize((0.5,), (0.5,)),
+        RandomHorizontalFlip(p=0.5), # practically doubles dataset
+        Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)), # imagenet values (used in ade20k training)
     ])
 
     # Load the dataset and make a split for training and validation
