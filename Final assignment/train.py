@@ -11,8 +11,9 @@ from torchvision.transforms.v2 import (Compose, Normalize, Resize, ToImage,ToDty
 from torch.cuda.amp import GradScaler, autocast
 from transformers import SegformerImageProcessor
 
+from augmentations import RandomScale
 from model import Model
-from loss import MeanDice
+from losses import MeanDice
 
 
 # Mapping class IDs to train IDs
@@ -75,7 +76,7 @@ def main(args):
     # Define the transforms to apply to the data
     train_transform = Compose([
         ToImage(),
-        # RandomScale(scale_range=(0.5, 2.0)), # improve scale invariance
+        RandomScale(scale_range=(0.5, 2.0), ), # improve scale invariance
         RandomCrop((512,1024)), # reduces dependence on global context from full image
         ToDtype(torch.float32, scale=True),
         RandomHorizontalFlip(p=0.5), # practically doubles dataset
