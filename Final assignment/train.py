@@ -89,7 +89,7 @@ def main(args):
     # Load the dataset and make a split for training and validation
     train_dataset = Cityscapes(
         args.data_dir, 
-        split="train", 
+        split="train_extra", 
         mode=args.annotation, 
         target_type="semantic", 
         transforms=train_transform
