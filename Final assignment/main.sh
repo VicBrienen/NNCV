@@ -3,7 +3,7 @@ wandb login
 python3 train.py \
     --data-dir ./data/cityscapes \
     --annotation "coarse" \
-    --batch-size 8 \
+    --batch-size 4 \
     --epochs 10 \
     --lr 0.0001 \
     --weight-decay 0.01 \
