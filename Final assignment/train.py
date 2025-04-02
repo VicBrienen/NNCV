@@ -121,7 +121,7 @@ def main(args):
     )
 
     # Define the model
-    model = Model(checkpoint=args.resume_checkpoint).to(device)
+    model = Model().to(device)
     state_dict = torch.load("./checkpoints/b5 coarse/coarse_annotation_pretrained.pth", map_location=device)
     model.load_state_dict(state_dict)
 
