@@ -12,9 +12,9 @@ class Model(torch.nn.Module):
 
     def forward(self, pixel_values, **kwargs):
         outputs = self.model(pixel_values=pixel_values)
-        logits = outputs.pred_logits
+        masks_queries_logits = outputs.masks_queries_logits
         return torch.nn.functional.interpolate(
-            logits,
+            masks_queries_logits,
             size=pixel_values.shape[2:],
             mode="bilinear",
             align_corners=False,
