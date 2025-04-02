@@ -122,6 +122,9 @@ def main(args):
 
     # Define the model
     model = Model(checkpoint=args.resume_checkpoint).to(device)
+    if args.resume_checkpoint is not None:
+        checkpoint = torch.load(args.resume_checkpoint, map_location=device)
+        model.load_state_dict(checkpoint)
 
     # Define the loss function and optimizer
     criterion = MeanDice()
