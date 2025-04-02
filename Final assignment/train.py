@@ -122,8 +122,6 @@ def main(args):
 
     # Define the model
     model = Model().to(device)
-    state_dict = torch.load("./checkpoints/b5 coarse/coarse_annotation_pretrained.pth", map_location=device)
-    model.load_state_dict(state_dict)
 
     # Define the loss function and optimizer
     criterion = MeanDice()

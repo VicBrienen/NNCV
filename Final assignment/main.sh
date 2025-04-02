@@ -10,4 +10,4 @@ python3 train.py \
     --weight-decay 0.01 \
     --num-workers 10 \
     --seed 42 \
-    --experiment-id "b5 coarse" \
+    --experiment-id "mask2former" \
