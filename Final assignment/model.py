@@ -1,20 +1,19 @@
 import torch
-from transformers import SegformerForSemanticSegmentation
+from transformers import Mask2FormerForUniversalSegmentation
 
 class Model(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.segformer = SegformerForSemanticSegmentation.from_pretrained(
-            "nvidia/segformer-b5-finetuned-ade-640-640",
-            num_labels=19,
-            ignore_mismatched_sizes=True
+        self.model = Mask2FormerForUniversalSegmentation.from_pretrained(
+            "facebook/mask2former-swin-large-mapillary-vistas-semantic"
         )
 
     def forward(self, pixel_values, **kwargs):
-        logits = self.segformer(pixel_values).logits
+        outputs = self.model(pixel_values=pixel_values)
+        logits = outputs.logits
         return torch.nn.functional.interpolate(
             logits,
-            size=pixel_values.shape[2:], 
+            size=pixel_values.shape[2:],
             mode="bilinear",
             align_corners=False,
         )
