@@ -2,7 +2,7 @@ wandb login
 
 python3 train.py \
     --data-dir ./data/cityscapes \
-    --annotation "coarse" \
+    --annotation "fine" \
     --resume-checkpoint "./checkpoints/b5 coarse/coarse_annotation_pretrained.pth" \
     --batch-size 8 \
     --epochs 3 \
