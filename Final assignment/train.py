@@ -122,9 +122,8 @@ def main(args):
 
     # Define the model
     model = Model(checkpoint=args.resume_checkpoint).to(device)
-    if args.resume_checkpoint is not None:
-        checkpoint = torch.load(args.resume_checkpoint, map_location=device)
-        model.load_state_dict(checkpoint)
+    state_dict = torch.load("./checkpoints/b5 coarse/coarse_annotation_pretrained.pth", map_location=device)
+    model.load_state_dict(state_dict)
 
     # Define the loss function and optimizer
     criterion = MeanDice()
