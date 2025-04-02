@@ -74,10 +74,8 @@ def main(args):
     # Define the transforms to apply to the data
     train_transform = Compose([
         ToImage(),
-        RandomAffine(degrees=0, scale=(0.5, 1.0)),  # improve scale invariance
-        RandomCrop((512,1024)), # reduces dependence on global context from full image
+        Resize((512, 1024)),
         ToDtype(torch.float32, scale=True),
-        RandomHorizontalFlip(p=0.5), # effectively doubles dataset
         Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)), # imagenet values (used in ade20k training)
     ])
 
