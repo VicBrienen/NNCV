@@ -88,7 +88,8 @@ def main(args):
     val_transform = Compose([
         ToImage(),
         ToDtype(torch.float32, scale=True),
-        Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)), # imagenet values (used in ade20k training)
+        Normalize(mean=(0.485, 0.456, 0.406),
+                  std=(0.229, 0.224, 0.225)), # imagenet values (used in ade20k training)
     ])
 
     # Load the dataset and make a split for training and validation
