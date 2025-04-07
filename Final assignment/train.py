@@ -75,7 +75,7 @@ def main(args):
     # Define the transforms to apply to the data
     train_transform = Compose([
         ToImage(),
-        RandomResize(scales=(0.5, 2.0)),
+        RandomResize(min_size=0.5, max_size=2,),
         RandomCrop((1024, 1024), pad_if_needed=True, fill={Image: 0, Mask: 255}),
         RandomHorizontalFlip(p=0.5),
         ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
