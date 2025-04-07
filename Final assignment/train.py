@@ -9,6 +9,7 @@ from torchvision.datasets import Cityscapes, wrap_dataset_for_transforms_v2
 from torchvision.utils import make_grid
 from torchvision.transforms.v2 import (Compose, Normalize, Resize, ToImage,ToDtype, RandomHorizontalFlip, RandomCrop, RandomAffine)
 from torch.cuda.amp import GradScaler, autocast
+from torchvision.tv_tensors import Image, Mask
 
 from model import Model
 from losses import MeanDice
@@ -74,14 +75,16 @@ def main(args):
     # Define the transforms to apply to the data
     train_transform = Compose([
         ToImage(),
-        Resize((512, 1024)),
+        RandomAffine(degrees=0, scale=(0.5, 2)),
+        RandomCrop((1024, 1024), pad_if_needed=True, fill={Image: 0, Mask: 255}),
+        RandomHorizontalFlip(p=0.5),
         ToDtype(torch.float32, scale=True),
-        Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)), # imagenet values (used in ade20k training)
+        Normalize(mean=(0.485, 0.456, 0.406),
+                  std=(0.229, 0.224, 0.225)), # imagenet values (used in ade20k training)
     ])
 
     val_transform = Compose([
         ToImage(),
-        Resize((512, 1024)),
         ToDtype(torch.float32, scale=True),
         Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)), # imagenet values (used in ade20k training)
     ])
