@@ -7,7 +7,7 @@ from torch.optim import AdamW
 from torch.utils.data import DataLoader
 from torchvision.datasets import Cityscapes, wrap_dataset_for_transforms_v2
 from torchvision.utils import make_grid
-from torchvision.transforms.v2 import (Compose, Normalize, Resize, ToImage,ToDtype, RandomHorizontalFlip, RandomCrop, RandomAffine)
+from torchvision.transforms.v2 import (Compose, Normalize, Resize, ToImage,ToDtype, RandomHorizontalFlip, RandomCrop, RandomResize)
 from torch.cuda.amp import GradScaler, autocast
 from torchvision.tv_tensors import Image, Mask
 
@@ -75,7 +75,7 @@ def main(args):
     # Define the transforms to apply to the data
     train_transform = Compose([
         ToImage(),
-        RandomAffine(degrees=0, scale=(0.5, 2)),
+        RandomResize(scales=(0.5, 2.0)),
         RandomCrop((1024, 1024), pad_if_needed=True, fill={Image: 0, Mask: 255}),
         RandomHorizontalFlip(p=0.5),
         ToDtype(torch.float32, scale=True),
