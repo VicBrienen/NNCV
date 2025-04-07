@@ -7,7 +7,7 @@ from torch.optim import AdamW
 from torch.utils.data import DataLoader
 from torchvision.datasets import Cityscapes, wrap_dataset_for_transforms_v2
 from torchvision.utils import make_grid
-from torchvision.transforms.v2 import (Compose, Normalize, Resize, ToImage,ToDtype, RandomHorizontalFlip, RandomCrop, RandomResize)
+from torchvision.transforms.v2 import (Compose, Normalize, ToImage,ToDtype, RandomHorizontalFlip, RandomCrop, RandomResize, ColorJitter, GaussianBlur)
 from torch.cuda.amp import GradScaler, autocast
 from torchvision.tv_tensors import Image, Mask
 
@@ -78,6 +78,8 @@ def main(args):
         RandomResize(scales=(0.5, 2.0)),
         RandomCrop((1024, 1024), pad_if_needed=True, fill={Image: 0, Mask: 255}),
         RandomHorizontalFlip(p=0.5),
+        ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
+        GaussianBlur(kernel_size=5, sigma=(0.1, 2.0))
         ToDtype(torch.float32, scale=True),
         Normalize(mean=(0.485, 0.456, 0.406),
                   std=(0.229, 0.224, 0.225)), # imagenet values (used in ade20k training)
