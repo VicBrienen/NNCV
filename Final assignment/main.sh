@@ -3,8 +3,8 @@ wandb login
 python3 train.py \
     --data-dir ./data/cityscapes \
     --resume-checkpoint "None" \
-    --batch-size 2 \
-    --accumulation_steps 4 \
+    --batch-size 3 \
+    --accumulation_steps 12 \
     --epochs 30 \
     --lr 0.00006 \
     --weight-decay 0.01 \
