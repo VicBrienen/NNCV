@@ -161,6 +161,8 @@ def main(args):
             images, labels = images.to(device), labels.to(device)
             labels = labels.long().squeeze(1)  # Remove channel dimension
 
+            accumulated_loss = 0
+
             # Forward pass with autocast
             with torch.cuda.amp.autocast():
                 outputs = model(images)
