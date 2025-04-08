@@ -5,7 +5,7 @@ class Model(torch.nn.Module):
     def __init__(self):
         super().__init__()
         self.segformer = SegformerForSemanticSegmentation.from_pretrained(
-            "nvidia/segformer-b4-finetuned-ade-512-512",
+            "nvidia/segformer-b3-finetuned-ade-512-512",
             num_labels=19,
             ignore_mismatched_sizes=True
         )
