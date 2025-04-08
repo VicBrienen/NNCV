@@ -186,7 +186,7 @@ def main(args):
                     "train_loss": accumulated_loss.item(),
                     "learning_rate": optimizer.param_groups[0]['lr'],
                     "epoch": epoch + 1,
-                }, step=epoch * len(train_dataloader) + i)
+                }, step=epoch * len(train_dataloader) + (i+1)//accumulation_steps)
 
                 accumulated_loss=0
 
