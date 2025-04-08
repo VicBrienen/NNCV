@@ -189,11 +189,11 @@ def main(args):
                     wandb.log({
                         "predictions": [wandb.Image(predictions_img)],
                         "labels": [wandb.Image(labels_img)],
-                    })
+                    }, commit=False)
             
             valid_loss = sum(losses) / len(losses)
 
-            wandb.log({"valid_loss": valid_loss})
+            wandb.log({"valid_loss": valid_loss}, commit=False)
 
             if valid_loss < best_valid_loss:
                 best_valid_loss = valid_loss
