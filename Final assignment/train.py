@@ -119,7 +119,6 @@ def main(args):
     accumulation_steps = args.accumulation_steps
 
     # Training loop
-    step = 0
     best_valid_loss = float('inf')
     current_best_model_path = None
     for epoch in range(args.epochs):
@@ -154,14 +153,13 @@ def main(args):
             if (i + 1) % accumulation_steps == 0 or (i + 1) == len(train_dataloader):
                 scaler.step(optimizer)
                 scaler.update()
-                step += 1
                 optimizer.zero_grad()
 
                 wandb.log({
                     "train_loss": accumulated_loss.item(),
                     "learning_rate": optimizer.param_groups[0]['lr'],
                     "epoch": epoch + 1,
-                }, step=step)
+                })
 
                 accumulated_loss=0
 
@@ -191,13 +189,11 @@ def main(args):
                     wandb.log({
                         "predictions": [wandb.Image(predictions_img)],
                         "labels": [wandb.Image(labels_img)],
-                    }, step=step)
+                    })
             
             valid_loss = sum(losses) / len(losses)
 
-            wandb.log({
-                "valid_loss": valid_loss
-            }, step=step)
+            wandb.log({"valid_loss": valid_loss})
 
             if valid_loss < best_valid_loss:
                 best_valid_loss = valid_loss
