@@ -134,9 +134,15 @@ def main(args):
     criterion = MeanDice()
     optimizer = AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
-    # poly decay
-    lr_lambda = lambda epoch: (1 - epoch / args.epochs) ** 0.9
+    # poly decay with warmup
+    def lr_lambda(epoch, warmup_epochs=1):
+        if epoch < warmup_epochs:
+            return float(epoch + 1) / warmup_epochs
+        else:
+            return ((1 - (epoch - warmup_epochs) / (args.epochs - warmup_epochs)) ** 0.9)
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lr_lambda)
+
+    
 
     # initialize AMP GradScaler
     scaler = torch.cuda.amp.GradScaler()
