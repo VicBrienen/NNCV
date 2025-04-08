@@ -127,9 +127,8 @@ def main(args):
         # Training
         model.train()
 
-        # 0 gradient at start of epoch
+        # zero gradient and accumulated loss at start of epoch
         optimizer.zero_grad()
-
         accumulated_loss = 0
 
         for i, (images, labels) in enumerate(train_dataloader):
