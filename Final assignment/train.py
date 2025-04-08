@@ -40,15 +40,17 @@ def convert_train_id_to_color(prediction: torch.Tensor) -> torch.Tensor:
 def get_args_parser():
 
     parser = ArgumentParser("Training script for a PyTorch U-Net model")
+    parser.add_argument("--experiment-id", type=str, default="unet-training", help="Experiment ID for Weights & Biases")
     parser.add_argument("--data-dir", type=str, default="./data/cityscapes", help="Path to the training data")
     parser.add_argument("--resume-checkpoint", type=str, default=None, help="Path to checkpoint for fine-tuning")
     parser.add_argument("--batch-size", type=int, default=64, help="Training batch size")
+    parser.add_argument("--accumulation_steps", type=int, default=1, help="Number of mini-batches to accumulate gradients over")
     parser.add_argument("--epochs", type=int, default=10, help="Number of training epochs")
     parser.add_argument("--lr", type=float, default=0.0001, help="Learning rate")
     parser.add_argument("--weight-decay", type=float, default=0.001, help="Weight decay for the optimizer")
     parser.add_argument("--num-workers", type=int, default=10, help="Number of workers for data loaders")
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
-    parser.add_argument("--experiment-id", type=str, default="unet-training", help="Experiment ID for Weights & Biases")
+    
 
     return parser
 
@@ -139,6 +141,9 @@ def main(args):
     # initialize AMP GradScaler
     scaler = torch.cuda.amp.GradScaler()
 
+    # number of gradient accumulation steps
+    accumulation_steps = args.accumulation_steps
+
     # Training loop
     best_valid_loss = float('inf')
     current_best_model_path = None
@@ -147,30 +152,37 @@ def main(args):
 
         # Training
         model.train()
-        for i, (images, labels) in enumerate(train_dataloader):
 
+        # 0 gradient at start of epoch
+        optimizer.zero_grad()
+
+        for i, (images, labels) in enumerate(train_dataloader):
             labels = convert_to_train_id(labels)  # Convert class IDs to train IDs
             images, labels = images.to(device), labels.to(device)
-
             labels = labels.long().squeeze(1)  # Remove channel dimension
-
-            optimizer.zero_grad()
 
             # Forward pass with autocast
             with torch.cuda.amp.autocast():
                 outputs = model(images)
                 loss = criterion(outputs, labels)
 
+            # normalize loss
+            loss = loss / accumulation_steps
+
             # Backward pass with scaling
             scaler.scale(loss).backward()
-            scaler.step(optimizer)
-            scaler.update()
 
-            wandb.log({
-                "train_loss": loss.item(),
-                "learning_rate": optimizer.param_groups[0]['lr'],
-                "epoch": epoch + 1,
-            }, step=epoch * len(train_dataloader) + i)
+
+            if (i + 1) % accumulation_steps == 0 or (i + 1) == len(train_dataloader):
+                scaler.step(optimizer)
+                scaler.update()
+                optimizer.zero_grad()
+
+                wandb.log({
+                    "train_loss": loss.item(),
+                    "learning_rate": optimizer.param_groups[0]['lr'],
+                    "epoch": epoch + 1,
+                }, step=epoch * len(train_dataloader) + i)
         
         scheduler.step()
             
