@@ -161,7 +161,7 @@ def main(args):
                     "train_loss": accumulated_loss.item(),
                     "learning_rate": optimizer.param_groups[0]['lr'],
                     "epoch": epoch + 1,
-                }, step)
+                }, step=step)
 
                 accumulated_loss=0
 
@@ -191,13 +191,13 @@ def main(args):
                     wandb.log({
                         "predictions": [wandb.Image(predictions_img)],
                         "labels": [wandb.Image(labels_img)],
-                    }, step=(epoch + 1) * len(train_dataloader) - 1)
+                    }, step=step)
             
             valid_loss = sum(losses) / len(losses)
 
             wandb.log({
                 "valid_loss": valid_loss
-            }, step=(epoch + 1) * len(train_dataloader) - 1)
+            }, step=step)
 
             if valid_loss < best_valid_loss:
                 best_valid_loss = valid_loss
