@@ -156,12 +156,12 @@ def main(args):
         # 0 gradient at start of epoch
         optimizer.zero_grad()
 
+        accumulated_loss = 0
+
         for i, (images, labels) in enumerate(train_dataloader):
             labels = convert_to_train_id(labels)  # Convert class IDs to train IDs
             images, labels = images.to(device), labels.to(device)
             labels = labels.long().squeeze(1)  # Remove channel dimension
-
-            accumulated_loss = 0
 
             # Forward pass with autocast
             with torch.cuda.amp.autocast():
