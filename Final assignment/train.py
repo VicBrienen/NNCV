@@ -169,6 +169,8 @@ def main(args):
             # normalize loss
             loss = loss / accumulation_steps
 
+            accumulated_loss += loss
+
             # Backward pass with scaling
             scaler.scale(loss).backward()
 
@@ -179,11 +181,13 @@ def main(args):
                 optimizer.zero_grad()
 
                 wandb.log({
-                    "train_loss": loss.item(),
+                    "train_loss": accumulated_loss.item(),
                     "learning_rate": optimizer.param_groups[0]['lr'],
                     "epoch": epoch + 1,
                 }, step=epoch * len(train_dataloader) + i)
-        
+
+                accumulated_loss=0
+
         scheduler.step()
             
         # Validation
