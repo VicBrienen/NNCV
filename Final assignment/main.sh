@@ -4,7 +4,7 @@ python3 train.py \
     --data-dir ./data/cityscapes \
     --resume-checkpoint "None" \
     --batch-size 3 \
-    --accumulation_steps 12 \
+    --accumulation_steps 40 \
     --epochs 30 \
     --lr 0.00006 \
     --weight-decay 0.01 \
