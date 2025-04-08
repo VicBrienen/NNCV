@@ -10,4 +10,4 @@ python3 train.py \
     --weight-decay 0.01 \
     --num-workers 10 \
     --seed 42 \
-    --experiment-id "segformer b5 ADE20k pretrained" \
+    --experiment-id "segformer b4 ADE20k pretrained" \
