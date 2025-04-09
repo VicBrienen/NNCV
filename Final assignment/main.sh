@@ -3,11 +3,11 @@ wandb login
 python3 train.py \
     --data-dir ./data/cityscapes \
     --resume-checkpoint "None" \
-    --batch-size 8 \
-    --accumulation_steps 2 \
+    --batch-size 4 \
+    --accumulation_steps 4 \
     --epochs 50 \
     --lr 0.00006 \
     --weight-decay 0.01 \
-    --num-workers 32 \
+    --num-workers 16 \
     --seed 42 \
     --experiment-id "segformer b5 ADE20k pretrained" \
