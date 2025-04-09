@@ -8,6 +8,6 @@ python3 train.py \
     --epochs 50 \
     --lr 0.00006 \
     --weight-decay 0.01 \
-    --num-workers 10 \
+    --num-workers 16 \
     --seed 42 \
     --experiment-id "segformer b5 ADE20k pretrained" \
