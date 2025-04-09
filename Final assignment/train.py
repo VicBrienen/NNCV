@@ -129,39 +129,37 @@ def main(args):
 
         # zero gradient and accumulated loss at start of epoch
         optimizer.zero_grad()
-        accumulated_loss = 0
+
+        losses = []
 
         for i, (images, labels) in enumerate(train_dataloader):
             labels = convert_to_train_id(labels)  # Convert class IDs to train IDs
             images, labels = images.to(device), labels.to(device)
             labels = labels.long().squeeze(1)  # Remove channel dimension
-
+            
             # Forward pass with autocast
             with torch.cuda.amp.autocast():
                 outputs = model(images)
                 loss = criterion(outputs, labels)
 
-            # normalize loss
+            losses.append(loss)
             loss = loss / accumulation_steps
-
-            accumulated_loss += loss
 
             # Backward pass with scaling
             scaler.scale(loss).backward()
-
 
             if (i + 1) % accumulation_steps == 0 or (i + 1) == len(train_dataloader):
                 scaler.step(optimizer)
                 scaler.update()
                 optimizer.zero_grad()
+                loss = sum(losses)/len(losses)
 
                 wandb.log({
-                    "train_loss": accumulated_loss.item(),
+                    "train_loss": loss.item(),
                     "learning_rate": optimizer.param_groups[0]['lr'],
                     "epoch": epoch + 1,
                 })
-
-                accumulated_loss=0
+                losses = []
 
         scheduler.step()
             
