@@ -5,9 +5,9 @@ python3 train.py \
     --resume-checkpoint "None" \
     --batch-size 4 \
     --accumulation_steps 4 \
-    --epochs 30 \
+    --epochs 50 \
     --lr 0.00006 \
     --weight-decay 0.01 \
     --num-workers 10 \
     --seed 42 \
-    --experiment-id "segformer b3 ADE20k pretrained" \
+    --experiment-id "segformer b5 ADE20k pretrained" \
