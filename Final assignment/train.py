@@ -115,7 +115,7 @@ def main(args):
     # load pretrained weigths checkpoint
     if args.resume_checkpoint is not None:
         checkpoint = torch.load(args.resume_checkpoint, map_location=device)
-        model.load_state_dict(checkpoint["model_state_dict"])
+        model.load_state_dict(checkpoint)
 
     # Define the loss function and optimizer
     criterion = MeanDice()
