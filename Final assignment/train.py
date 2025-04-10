@@ -64,6 +64,7 @@ def main(args):
      # Define the transforms to apply to the data
     train_transform = Compose([
         ToImage(),
+        RandomCrop((1024, 1024)),
         ToDtype(torch.float32, scale=True),
         Normalize(mean=(0.485, 0.456, 0.406),
                   std=(0.229, 0.224, 0.225)), # imagenet values (used in ade20k training)

@@ -3,8 +3,8 @@ wandb login
 python3 train.py \
     --data-dir ./data/cityscapes \
     --resume-checkpoint "checkpoints/pretrained/model.pth" \
-    --batch-size 1 \
-    --accumulation_steps 16 \
+    --batch-size 2 \
+    --accumulation_steps 8 \
     --epochs 10 \
     --lr 0.00006 \
     --weight-decay 0.01 \
