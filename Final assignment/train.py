@@ -49,13 +49,21 @@ def main(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Define the transforms to apply to the data
-    train_transform = Compose([
+    train_transform_robustness = Compose([
         ToImage(),
         RandomAffine(degrees=0, scale=(0.5, 2.0)),
         RandomCrop((1024, 1024), pad_if_needed=True, fill={Image: 0, Mask: 255}),
         RandomHorizontalFlip(p=0.5),
         ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
         GaussianBlur(kernel_size=5, sigma=(0.1, 2.0)),
+        ToDtype(torch.float32, scale=True),
+        Normalize(mean=(0.485, 0.456, 0.406),
+                  std=(0.229, 0.224, 0.225)), # imagenet values (used in ade20k training)
+    ])
+
+     # Define the transforms to apply to the data
+    train_transform = Compose([
+        ToImage(),
         ToDtype(torch.float32, scale=True),
         Normalize(mean=(0.485, 0.456, 0.406),
                   std=(0.229, 0.224, 0.225)), # imagenet values (used in ade20k training)
@@ -103,6 +111,11 @@ def main(args):
 
     # Define the model
     model = Model().to(device)
+
+    # load pretrained weigths checkpoint
+    if args.resume_checkpoint is not None:
+        checkpoint = torch.load(args.resume_checkpoint, map_location=device)
+        model.load_state_dict(checkpoint["model_state_dict"])
 
     # Define the loss function and optimizer
     criterion = MeanDice()
