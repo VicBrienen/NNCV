@@ -2,7 +2,7 @@ wandb login
 
 python3 train.py \
     --data-dir ./data/cityscapes \
-    --resume-checkpoint "checkpoints/model.pth" \
+    --resume-checkpoint "/checkpoints/model.pth" \
     --batch-size 1 \
     --accumulation_steps 16 \
     --epochs 10 \
