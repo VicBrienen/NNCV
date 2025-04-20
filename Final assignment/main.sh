@@ -5,7 +5,7 @@ python3 train.py \
     --resume-checkpoint "checkpoints/pretrained/model.pth" \
     --batch-size 2 \
     --accumulation_steps 8 \
-    --epochs 10 \
+    --epochs 50 \
     --lr 0.00006 \
     --weight-decay 0.01 \
     --num-workers 10 \
