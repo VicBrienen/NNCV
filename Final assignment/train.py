@@ -100,14 +100,16 @@ def main(args):
         num_workers=args.num_workers
     )
 
-    # Define the model
+    # define the model
     model = Model().to(device)
 
-    # Define the loss function and optimizer
+    # define the loss function
     criterion = MeanDice()
+
+    # define optimizer
     optimizer = AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
-    # poly decay
+    # define learning rate scheduler with polynomial decay
     lr_lambda = lambda epoch: (1 - epoch / args.epochs) ** 0.9
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lr_lambda)
 
