@@ -19,7 +19,6 @@ def get_args_parser():
     parser = ArgumentParser("Training script for a PyTorch U-Net model")
     parser.add_argument("--experiment-id", type=str, default="unet-training", help="Experiment ID for Weights & Biases")
     parser.add_argument("--data-dir", type=str, default="./data/cityscapes", help="Path to the training data")
-    parser.add_argument("--resume-checkpoint", type=str, default=None, help="Path to checkpoint for fine-tuning")
     parser.add_argument("--batch-size", type=int, default=64, help="Training batch size")
     parser.add_argument("--accumulation_steps", type=int, default=1, help="Number of mini-batches to accumulate gradients over")
     parser.add_argument("--epochs", type=int, default=10, help="Number of training epochs")
@@ -103,11 +102,6 @@ def main(args):
 
     # Define the model
     model = Model().to(device)
-
-    # load pretrained weigths checkpoint
-    if args.resume_checkpoint is not None:
-        checkpoint = torch.load(args.resume_checkpoint, map_location=device)
-        model.load_state_dict(checkpoint)
 
     # Define the loss function and optimizer
     criterion = MeanDice()
